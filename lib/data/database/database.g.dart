@@ -2209,6 +2209,34 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
     requiredDuringInsert: false,
     defaultValue: Constant('#1ca0d9'),
   );
+  static const VerificationMeta _phoneMeta = const VerificationMeta('phone');
+  @override
+  late final GeneratedColumn<String> phone = GeneratedColumn<String>(
+    'phone',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 0,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _providerMeta = const VerificationMeta(
+    'provider',
+  );
+  @override
+  late final GeneratedColumn<String> provider = GeneratedColumn<String>(
+    'provider',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 0,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _noteMeta = const VerificationMeta('note');
   @override
   late final GeneratedColumn<String> note = GeneratedColumn<String>(
@@ -2247,6 +2275,8 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
     id,
     name,
     color,
+    phone,
+    provider,
     note,
     createdAt,
     updatedAt,
@@ -2278,6 +2308,18 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
       context.handle(
         _colorMeta,
         color.isAcceptableOrUnknown(data['color']!, _colorMeta),
+      );
+    }
+    if (data.containsKey('phone')) {
+      context.handle(
+        _phoneMeta,
+        phone.isAcceptableOrUnknown(data['phone']!, _phoneMeta),
+      );
+    }
+    if (data.containsKey('provider')) {
+      context.handle(
+        _providerMeta,
+        provider.isAcceptableOrUnknown(data['provider']!, _providerMeta),
       );
     }
     if (data.containsKey('note')) {
@@ -2319,6 +2361,14 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
         DriftSqlType.string,
         data['${effectivePrefix}color'],
       )!,
+      phone: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}phone'],
+      ),
+      provider: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}provider'],
+      ),
       note: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}note'],
@@ -2344,6 +2394,8 @@ class Contact extends DataClass implements Insertable<Contact> {
   final int id;
   final String name;
   final String color;
+  final String? phone;
+  final String? provider;
   final String? note;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -2351,6 +2403,8 @@ class Contact extends DataClass implements Insertable<Contact> {
     required this.id,
     required this.name,
     required this.color,
+    this.phone,
+    this.provider,
     this.note,
     required this.createdAt,
     required this.updatedAt,
@@ -2361,6 +2415,12 @@ class Contact extends DataClass implements Insertable<Contact> {
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
     map['color'] = Variable<String>(color);
+    if (!nullToAbsent || phone != null) {
+      map['phone'] = Variable<String>(phone);
+    }
+    if (!nullToAbsent || provider != null) {
+      map['provider'] = Variable<String>(provider);
+    }
     if (!nullToAbsent || note != null) {
       map['note'] = Variable<String>(note);
     }
@@ -2374,6 +2434,12 @@ class Contact extends DataClass implements Insertable<Contact> {
       id: Value(id),
       name: Value(name),
       color: Value(color),
+      phone: phone == null && nullToAbsent
+          ? const Value.absent()
+          : Value(phone),
+      provider: provider == null && nullToAbsent
+          ? const Value.absent()
+          : Value(provider),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
@@ -2389,6 +2455,8 @@ class Contact extends DataClass implements Insertable<Contact> {
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       color: serializer.fromJson<String>(json['color']),
+      phone: serializer.fromJson<String?>(json['phone']),
+      provider: serializer.fromJson<String?>(json['provider']),
       note: serializer.fromJson<String?>(json['note']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -2401,6 +2469,8 @@ class Contact extends DataClass implements Insertable<Contact> {
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'color': serializer.toJson<String>(color),
+      'phone': serializer.toJson<String?>(phone),
+      'provider': serializer.toJson<String?>(provider),
       'note': serializer.toJson<String?>(note),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -2411,6 +2481,8 @@ class Contact extends DataClass implements Insertable<Contact> {
     int? id,
     String? name,
     String? color,
+    Value<String?> phone = const Value.absent(),
+    Value<String?> provider = const Value.absent(),
     Value<String?> note = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -2418,6 +2490,8 @@ class Contact extends DataClass implements Insertable<Contact> {
     id: id ?? this.id,
     name: name ?? this.name,
     color: color ?? this.color,
+    phone: phone.present ? phone.value : this.phone,
+    provider: provider.present ? provider.value : this.provider,
     note: note.present ? note.value : this.note,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -2427,6 +2501,8 @@ class Contact extends DataClass implements Insertable<Contact> {
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
       color: data.color.present ? data.color.value : this.color,
+      phone: data.phone.present ? data.phone.value : this.phone,
+      provider: data.provider.present ? data.provider.value : this.provider,
       note: data.note.present ? data.note.value : this.note,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -2439,6 +2515,8 @@ class Contact extends DataClass implements Insertable<Contact> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('color: $color, ')
+          ..write('phone: $phone, ')
+          ..write('provider: $provider, ')
           ..write('note: $note, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -2447,7 +2525,8 @@ class Contact extends DataClass implements Insertable<Contact> {
   }
 
   @override
-  int get hashCode => Object.hash(id, name, color, note, createdAt, updatedAt);
+  int get hashCode =>
+      Object.hash(id, name, color, phone, provider, note, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2455,6 +2534,8 @@ class Contact extends DataClass implements Insertable<Contact> {
           other.id == this.id &&
           other.name == this.name &&
           other.color == this.color &&
+          other.phone == this.phone &&
+          other.provider == this.provider &&
           other.note == this.note &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
@@ -2464,6 +2545,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
   final Value<int> id;
   final Value<String> name;
   final Value<String> color;
+  final Value<String?> phone;
+  final Value<String?> provider;
   final Value<String?> note;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -2471,6 +2554,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.color = const Value.absent(),
+    this.phone = const Value.absent(),
+    this.provider = const Value.absent(),
     this.note = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -2479,6 +2564,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     this.id = const Value.absent(),
     required String name,
     this.color = const Value.absent(),
+    this.phone = const Value.absent(),
+    this.provider = const Value.absent(),
     this.note = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -2487,6 +2574,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     Expression<int>? id,
     Expression<String>? name,
     Expression<String>? color,
+    Expression<String>? phone,
+    Expression<String>? provider,
     Expression<String>? note,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -2495,6 +2584,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (color != null) 'color': color,
+      if (phone != null) 'phone': phone,
+      if (provider != null) 'provider': provider,
       if (note != null) 'note': note,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -2505,6 +2596,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     Value<int>? id,
     Value<String>? name,
     Value<String>? color,
+    Value<String?>? phone,
+    Value<String?>? provider,
     Value<String?>? note,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
@@ -2513,6 +2606,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
       id: id ?? this.id,
       name: name ?? this.name,
       color: color ?? this.color,
+      phone: phone ?? this.phone,
+      provider: provider ?? this.provider,
       note: note ?? this.note,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -2530,6 +2625,12 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     }
     if (color.present) {
       map['color'] = Variable<String>(color.value);
+    }
+    if (phone.present) {
+      map['phone'] = Variable<String>(phone.value);
+    }
+    if (provider.present) {
+      map['provider'] = Variable<String>(provider.value);
     }
     if (note.present) {
       map['note'] = Variable<String>(note.value);
@@ -2549,6 +2650,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('color: $color, ')
+          ..write('phone: $phone, ')
+          ..write('provider: $provider, ')
           ..write('note: $note, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -13508,6 +13611,8 @@ typedef $$ContactsTableCreateCompanionBuilder =
       Value<int> id,
       required String name,
       Value<String> color,
+      Value<String?> phone,
+      Value<String?> provider,
       Value<String?> note,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
@@ -13517,6 +13622,8 @@ typedef $$ContactsTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> name,
       Value<String> color,
+      Value<String?> phone,
+      Value<String?> provider,
       Value<String?> note,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
@@ -13566,6 +13673,16 @@ class $$ContactsTableFilterComposer
 
   ColumnFilters<String> get color => $composableBuilder(
     column: $table.color,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get phone => $composableBuilder(
+    column: $table.phone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get provider => $composableBuilder(
+    column: $table.provider,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -13634,6 +13751,16 @@ class $$ContactsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get phone => $composableBuilder(
+    column: $table.phone,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get provider => $composableBuilder(
+    column: $table.provider,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get note => $composableBuilder(
     column: $table.note,
     builder: (column) => ColumnOrderings(column),
@@ -13667,6 +13794,12 @@ class $$ContactsTableAnnotationComposer
 
   GeneratedColumn<String> get color =>
       $composableBuilder(column: $table.color, builder: (column) => column);
+
+  GeneratedColumn<String> get phone =>
+      $composableBuilder(column: $table.phone, builder: (column) => column);
+
+  GeneratedColumn<String> get provider =>
+      $composableBuilder(column: $table.provider, builder: (column) => column);
 
   GeneratedColumn<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => column);
@@ -13734,6 +13867,8 @@ class $$ContactsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String> color = const Value.absent(),
+                Value<String?> phone = const Value.absent(),
+                Value<String?> provider = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -13741,6 +13876,8 @@ class $$ContactsTableTableManager
                 id: id,
                 name: name,
                 color: color,
+                phone: phone,
+                provider: provider,
                 note: note,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -13750,6 +13887,8 @@ class $$ContactsTableTableManager
                 Value<int> id = const Value.absent(),
                 required String name,
                 Value<String> color = const Value.absent(),
+                Value<String?> phone = const Value.absent(),
+                Value<String?> provider = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -13757,6 +13896,8 @@ class $$ContactsTableTableManager
                 id: id,
                 name: name,
                 color: color,
+                phone: phone,
+                provider: provider,
                 note: note,
                 createdAt: createdAt,
                 updatedAt: updatedAt,

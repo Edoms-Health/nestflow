@@ -13,7 +13,9 @@ class ContactFormScreen extends StatefulWidget {
 
 class _ContactFormScreenState extends State<ContactFormScreen> {
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
+  String? _provider;
 
   @override
   void initState() {
@@ -21,12 +23,15 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
     context.read<ContactCubit>().formInit();
 
     _nameController.text = widget.contact?.name ?? '';
+    _phoneController.text = widget.contact?.phone ?? '';
     _noteController.text = widget.contact?.note ?? '';
+    _provider = widget.contact?.provider;
   }
 
   @override
   void dispose() {
     _nameController.dispose();
+    _phoneController.dispose();
     _noteController.dispose();
     super.dispose();
   }
@@ -65,6 +70,10 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
                   widget.contact,
                   _nameController.text,
                   _noteController.text,
+                  phone: _phoneController.text.trim().isEmpty
+                      ? null
+                      : _phoneController.text.trim(),
+                  provider: _provider,
                 )) {
                   if (!context.mounted) return;
                   Navigator.pop(context);
@@ -89,6 +98,38 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
                         ),
                         errorText: state.errors['name'],
                         maxLength: 30,
+                      ),
+                    ],
+                  ),
+                ),
+                ContainerForm(
+                  margin: EdgeInsets.only(bottom: 10),
+                  child: Column(
+                    children: [
+                      CustomTextFormField(
+                        label: 'Phone Number',
+                        controller: _phoneController,
+                        hintText: 'e.g. 0700000000',
+                        errorText: state.errors['phone'],
+                        maxLength: 15,
+                        required: false,
+                        keyboardType: TextInputType.phone,
+                      ),
+                      SizedBox(height: 12),
+                      DropdownButtonFormField<String>(
+                        initialValue: _provider,
+                        decoration: InputDecoration(
+                          labelText: 'Mobile Money Provider',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        items: const [
+                          DropdownMenuItem(value: 'airtel', child: Text('Airtel Money')),
+                          DropdownMenuItem(value: 'mtn', child: Text('MTN MoMo')),
+                          DropdownMenuItem(value: 'other', child: Text('Other / None')),
+                        ],
+                        onChanged: (value) => setState(() => _provider = value),
                       ),
                     ],
                   ),

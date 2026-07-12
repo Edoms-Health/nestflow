@@ -60,7 +60,7 @@ class AppDatabase extends _$AppDatabase {
   static AppDatabase get instance => _instance;
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   static QueryExecutor _openConnection() {
     return driftDatabase(
@@ -107,6 +107,10 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 9) {
         await m.createTable(cashbookExpenses);
+      }
+      if (from < 11) {
+        await m.addColumn(contacts, contacts.phone);
+        await m.addColumn(contacts, contacts.provider);
       }
       if (from < 10) {
         await m.addColumn(branches, branches.phone);

@@ -64,8 +64,10 @@ class ContactCubit extends Cubit<ContactState> {
     Map<String, String> errorMessages,
     ContactModel? contact,
     String? name,
-    String? note,
-  ) async {
+    String? note, {
+    String? phone,
+    String? provider,
+  }) async {
     final ContactFormInitial formInitial = (state as ContactFormInitial);
     bool isSubmitted = false;
     if (await _validationForm(
@@ -80,6 +82,8 @@ class ContactCubit extends Cubit<ContactState> {
         id: contact?.id ?? 0,
         name: name!,
         note: note,
+        phone: phone,
+        provider: provider,
         color: contact?.color ?? ColorUtils.generateRandomColorHex(),
         createdAt: contact?.createdAt ?? now,
         updatedAt: now,
