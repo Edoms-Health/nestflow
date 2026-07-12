@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nestflow/nestflow.dart';
@@ -137,5 +140,34 @@ class SharedPreferencesService {
 
     final Duration diff = DateTime.now().difference(seededAt);
     return diff.inHours < 24;
+  }
+
+  String _hashPin(String pin) {
+    return sha256.convert(utf8.encode(pin)).toString();
+  }
+
+  Future<bool> hasWalletPin() async {
+    final hash = (await SharedPreferences.getInstance())
+        .getString(UserPrefsKeys.walletPinHash.name);
+    return hash != null && hash.isNotEmpty;
+  }
+
+  Future<void> saveWalletPin(String pin) async {
+    await (await SharedPreferences.getInstance()).setString(
+      UserPrefsKeys.walletPinHash.name,
+      _hashPin(pin),
+    );
+  }
+
+  Future<bool> verifyWalletPin(String pin) async {
+    final storedHash = (await SharedPreferences.getInstance())
+        .getString(UserPrefsKeys.walletPinHash.name);
+    if (storedHash == null) return false;
+    return storedHash == _hashPin(pin);
+  }
+
+  Future<void> clearWalletPin() async {
+    await (await SharedPreferences.getInstance())
+        .remove(UserPrefsKeys.walletPinHash.name);
   }
 }

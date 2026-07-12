@@ -33,10 +33,7 @@ class SettingScreen extends StatelessWidget {
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => BlocProvider(
-                                  create: (_) => WalletCubit()..loadWallets(),
-                                  child: WalletScreen(),
-                                ),
+                                builder: (context) => const WalletPinScreen(),
                               ),
                             ),
                           ),

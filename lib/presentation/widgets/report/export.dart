@@ -1,4 +1,5 @@
 export 'report_pdf_export.dart';
+export 'report_excel_export.dart';
 export 'categories_summary.dart';
 export 'category_summary_tile.dart';
 export 'debts_summary.dart';

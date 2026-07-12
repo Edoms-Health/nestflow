@@ -53,6 +53,32 @@ class DashboardScreen extends StatelessWidget {
                         expenses: state.totalExpenses,
                         income: state.totalIncome,
                       ),
+                      const SizedBox(height: 15),
+                      QuickActionsGrid(
+                        actions: [
+                          QuickAction(
+                            label: 'Add\nTransaction',
+                            icon: AppIcons.addTransaction,
+                            onTap: () => _openAddTransactionMenu(context),
+                          ),
+                          QuickAction(
+                            label: 'Transactions',
+                            icon: AppIcons.transaction,
+                            onTap: () =>
+                                (goToTransactions ?? () {}).call(),
+                          ),
+                          QuickAction(
+                            label: 'Business',
+                            icon: AppIcons.business,
+                            onTap: () => _goToBusiness(context),
+                          ),
+                          QuickAction(
+                            label: 'Wallets',
+                            icon: AppIcons.wallets,
+                            onTap: () => _goToWallets(context),
+                          ),
+                        ],
+                      ),
                       DashboardWeeklyChart(
                         chartData: context.isRtl
                             ? state.weeklyChartData.reversed.toList()
@@ -69,6 +95,38 @@ class DashboardScreen extends StatelessWidget {
               : Center(child: CircularProgressIndicator()),
         );
       },
+    );
+  }
+
+  void _openAddTransactionMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
+      builder: (context) => MenuModalBottomSheet(refresh: refresh),
+    );
+  }
+
+  void _goToBusiness(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BlocProvider(
+          create: (_) => BusinessCubit()..load(),
+          child: const BusinessCashbookScreen(),
+        ),
+      ),
+    );
+  }
+
+  void _goToWallets(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const WalletPinScreen(),
+      ),
     );
   }
 }

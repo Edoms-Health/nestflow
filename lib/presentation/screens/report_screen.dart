@@ -42,6 +42,15 @@ class ReportScreen extends StatelessWidget {
                 ),
               if (state is ReportLoaded)
                 IconButton(
+                  onPressed: () => exportReportExcel(context, state),
+                  icon: Icon(
+                    Icons.grid_on_outlined,
+                    size: 20,
+                    color: context.colors.textPrimary,
+                  ),
+                ),
+              if (state is ReportLoaded)
+                IconButton(
                   onPressed: () => _openFilter(context, state),
                   icon: SvgIcon(
                     icon: AppIcons.filters,

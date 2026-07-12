@@ -17,3 +17,4 @@ export 'transaction_form_screen.dart';
 export 'transaction_screen.dart';
 export 'wallet_form_screen.dart';
 export 'wallet_screen.dart';
+export 'wallet_pin_screen.dart';

@@ -6,4 +6,5 @@ enum UserPrefsKeys {
   enableLockApp,
   demoDataSeededAt,
   balanceHidden,
+  walletPinHash,
 }
