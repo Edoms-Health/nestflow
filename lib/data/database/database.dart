@@ -2,12 +2,16 @@ import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:nestflow/data/database/tables/export.dart';
+import 'package:nestflow/data/database/tables/financials_tables.dart';
+import 'package:nestflow/data/database/daos/financials/monthly_financial_dao.dart';
+import 'package:nestflow/data/database/daos/financials/balance_sheet_account_dao.dart';
 import 'package:nestflow/data/seeders/nestflow_seeder.dart';
 import 'package:nestflow/data/database/daos/business/business_dao.dart';
 import 'package:nestflow/data/database/tables/business_tables.dart';
 import 'package:nestflow/data/database/daos/todo/todo_dao.dart';
 import 'package:nestflow/data/database/daos/project/project_dao.dart';
 import 'package:nestflow/data/database/daos/label/label_dao.dart';
+import 'package:nestflow/data/database/daos/recurring_expense/recurring_expense_dao.dart';
 import 'package:nestflow/nestflow.dart';
 
 part 'database.g.dart';
@@ -37,6 +41,9 @@ part 'database.g.dart';
     Projects,
     Labels,
     TodoLabels,
+    MonthlyFinancials,
+    BalanceSheetAccounts,
+    RecurringExpenses,
   ],
   daos: [
     TagDao,
@@ -50,6 +57,9 @@ part 'database.g.dart';
     TodoDao,
     ProjectDao,
     LabelDao,
+    MonthlyFinancialDao,
+    BalanceSheetAccountDao,
+    RecurringExpenseDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -60,7 +70,7 @@ class AppDatabase extends _$AppDatabase {
   static AppDatabase get instance => _instance;
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 16;
 
   static QueryExecutor _openConnection() {
     return driftDatabase(
@@ -108,9 +118,26 @@ class AppDatabase extends _$AppDatabase {
       if (from < 9) {
         await m.createTable(cashbookExpenses);
       }
+      if (from < 13) {
+        await m.createTable(monthlyFinancials);
+        await m.createTable(balanceSheetAccounts);
+      }
+      if (from < 14) {
+        await m.addColumn(transactions, transactions.interestRate);
+      }
+      if (from < 15) {
+        await m.addColumn(transactions, transactions.interestIsDaily);
+      }
+      if (from < 16) {
+        await m.createTable(recurringExpenses);
+      }
       if (from < 11) {
         await m.addColumn(contacts, contacts.phone);
-        await m.addColumn(contacts, contacts.provider);
+      }
+      if (from == 11) {
+        await m.database.customStatement(
+          'ALTER TABLE contacts DROP COLUMN provider',
+        );
       }
       if (from < 10) {
         await m.addColumn(branches, branches.phone);
@@ -155,6 +182,7 @@ class AppDatabase extends _$AppDatabase {
   BusinessDao get businessDao => BusinessDao(this);
   ProjectDao get projectDao => ProjectDao(this);
   LabelDao get labelDao => LabelDao(this);
+  RecurringExpenseDao get recurringExpenseDao => RecurringExpenseDao(this);
 
   Future<void> truncate() async {
     await delete(categories).go();

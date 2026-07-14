@@ -9,12 +9,14 @@ class TransactionFormCubit extends Cubit<TransactionFormState> {
   final WalletService walletService = WalletService();
   final CategoryService categoryService = CategoryService();
   final TagService tagService = TagService();
+  final RecurringExpenseService recurringExpenseService = RecurringExpenseService();
 
   TransactionFormCubit() : super(TransactionFormLoading());
 
   Future<void> init({
     TransactionModel? transaction,
     required TransactionType type,
+    ContactModel? initialContact,
   }) async {
     final List<WalletModel> wallets = await walletService.fetchAll(
       isLocked: false,
@@ -33,7 +35,7 @@ class TransactionFormCubit extends Cubit<TransactionFormState> {
         type: type,
         walletId: transaction?.walletId ?? lastWallet.id,
         categoryId: transaction?.categoryId ?? categories.first.id,
-        contactId: transaction?.contactId,
+        contactId: transaction?.contactId ?? initialContact?.id,
         toWalletId: transaction?.toWalletId,
         date: transaction?.date ?? DateTime.now(),
         startDate:
@@ -42,9 +44,11 @@ class TransactionFormCubit extends Cubit<TransactionFormState> {
         endDate:
             transaction?.endDate ??
             (type == TransactionType.debts ? DateTime.now() : null),
-        contact: transaction?.contact,
+        contact: transaction?.contact ?? initialContact,
         currency: transaction?.currency ?? lastWallet.currency,
         noImpactOnBalance: transaction?.noImpactOnBalance ?? false,
+        isRecurring: false,
+        recurrenceFrequency: RecurrenceFrequency.monthly,
         tagIds: transaction?.tagIds ?? [],
       ),
     );
@@ -64,9 +68,13 @@ class TransactionFormCubit extends Cubit<TransactionFormState> {
     DateTime? date,
     DateTime? startDate,
     DateTime? endDate,
+    double? interestRate,
+    bool? interestIsDaily,
     String? currency,
     double? currencyRate,
     bool? noImpactOnBalance,
+    bool? isRecurring,
+    RecurrenceFrequency? recurrenceFrequency,
     bool? processing,
     Map<String, String>? errors,
     bool loadCategories = false,
@@ -89,6 +97,8 @@ class TransactionFormCubit extends Cubit<TransactionFormState> {
           toWalletId: toWalletId,
           startDate: startDate,
           endDate: endDate,
+          interestRate: interestRate,
+          interestIsDaily: interestIsDaily,
           tagIds: tagIds,
           date: date,
           currency: walletId != null
@@ -98,6 +108,8 @@ class TransactionFormCubit extends Cubit<TransactionFormState> {
               : currency,
           currencyRate: currencyRate,
           noImpactOnBalance: noImpactOnBalance,
+          isRecurring: isRecurring,
+          recurrenceFrequency: recurrenceFrequency,
           processing: processing,
           errors: errors,
         ),
@@ -132,6 +144,28 @@ class TransactionFormCubit extends Cubit<TransactionFormState> {
     }
   }
 
+  Future<void> _createRecurringTemplate(
+    TransactionFormInitial form,
+    TransactionModel model,
+  ) async {
+    final nextDueDate = form.recurrenceFrequency.next(model.date);
+    await recurringExpenseService.create(
+      RecurringExpenseModel(
+        id: 0,
+        amount: model.amount,
+        walletId: model.walletId,
+        categoryId: model.categoryId,
+        contactId: model.contactId,
+        note: model.note,
+        currency: model.currency,
+        frequency: form.recurrenceFrequency,
+        nextDueDate: nextDueDate,
+        createdAt: model.createdAt,
+        updatedAt: model.updatedAt,
+      ),
+    );
+  }
+
   Future<bool> submit(
     Map<String, String> errorMessages,
     TransactionModel? transaction,
@@ -151,6 +185,10 @@ class TransactionFormCubit extends Cubit<TransactionFormState> {
         currencyRate = await CurrencyRateUtils.forCurrency(form.currency!);
       }
 
+      final selectedCategory = form.categories.where((c) => c.id == form.categoryId).firstOrNull;
+      final isBorrowedDebt = form.type == TransactionType.debts &&
+          selectedCategory?.identifier == 'receiving_debts_and_installments';
+
       final model = TransactionModel(
         id: transaction?.id ?? 0,
         note: note,
@@ -160,6 +198,8 @@ class TransactionFormCubit extends Cubit<TransactionFormState> {
         date: form.date!,
         startDate: form.startDate,
         endDate: form.endDate,
+        interestRate: isBorrowedDebt ? form.interestRate : null,
+        interestIsDaily: isBorrowedDebt ? form.interestIsDaily : false,
         categoryId: form.categoryId!,
         contactId: form.contactId,
         toWalletId: form.toWalletId,
@@ -179,6 +219,12 @@ class TransactionFormCubit extends Cubit<TransactionFormState> {
         await NotificationService().scheduleTransactionFollowUp(model);
         await NotificationService().refreshDailyTransactionReport();
         await NotificationService().refreshDailyBudgetReport();
+
+        if (transaction == null &&
+            form.type == TransactionType.expenses &&
+            form.isRecurring) {
+          await _createRecurringTemplate(form, model);
+        }
       }
 
       emit(form.copyWith(processing: false, errors: {}));

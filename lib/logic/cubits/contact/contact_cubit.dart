@@ -66,7 +66,6 @@ class ContactCubit extends Cubit<ContactState> {
     String? name,
     String? note, {
     String? phone,
-    String? provider,
   }) async {
     final ContactFormInitial formInitial = (state as ContactFormInitial);
     bool isSubmitted = false;
@@ -83,7 +82,6 @@ class ContactCubit extends Cubit<ContactState> {
         name: name!,
         note: note,
         phone: phone,
-        provider: provider,
         color: contact?.color ?? ColorUtils.generateRandomColorHex(),
         createdAt: contact?.createdAt ?? now,
         updatedAt: now,
@@ -96,6 +94,20 @@ class ContactCubit extends Cubit<ContactState> {
       emit(formInitial.copyWith(processing: false, errors: {}));
     }
     return isSubmitted;
+  }
+
+  Future<ContactImportResult> importFromDevice() async {
+    try {
+      final granted = await service.requestDevicePermission();
+      if (!granted) {
+        return ContactImportResult.permissionDenied();
+      }
+      final count = await service.importFromDevice();
+      await loadContacts();
+      return ContactImportResult.success(count);
+    } catch (e) {
+      return ContactImportResult.error();
+    }
   }
 
   Future<bool> _validationForm(
@@ -122,4 +134,25 @@ class ContactCubit extends Cubit<ContactState> {
       return true;
     }
   }
+}
+
+class ContactImportResult {
+  final int importedCount;
+  final bool permissionDenied;
+  final bool error;
+
+  const ContactImportResult._({
+    this.importedCount = 0,
+    this.permissionDenied = false,
+    this.error = false,
+  });
+
+  factory ContactImportResult.success(int count) =>
+      ContactImportResult._(importedCount: count);
+
+  factory ContactImportResult.permissionDenied() =>
+      const ContactImportResult._(permissionDenied: true);
+
+  factory ContactImportResult.error() =>
+      const ContactImportResult._(error: true);
 }

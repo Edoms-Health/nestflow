@@ -503,6 +503,84 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get cancel;
 
+  /// No description provided for @data_management.
+  ///
+  /// In en, this message translates to:
+  /// **'Data Management'**
+  String get data_management;
+
+  /// No description provided for @export_all_data.
+  ///
+  /// In en, this message translates to:
+  /// **'Export All Data'**
+  String get export_all_data;
+
+  /// No description provided for @export_all_data_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Save all your data as an Excel file'**
+  String get export_all_data_description;
+
+  /// No description provided for @import_data.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Data'**
+  String get import_data;
+
+  /// No description provided for @import_data_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Load data from a previously exported Excel file'**
+  String get import_data_description;
+
+  /// No description provided for @exporting_data.
+  ///
+  /// In en, this message translates to:
+  /// **'Exporting data…'**
+  String get exporting_data;
+
+  /// No description provided for @importing_data.
+  ///
+  /// In en, this message translates to:
+  /// **'Importing data…'**
+  String get importing_data;
+
+  /// No description provided for @export_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Data exported successfully'**
+  String get export_success;
+
+  /// No description provided for @export_cancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Export cancelled'**
+  String get export_cancelled;
+
+  /// No description provided for @import_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Import data?'**
+  String get import_confirm_title;
+
+  /// No description provided for @import_confirm_message.
+  ///
+  /// In en, this message translates to:
+  /// **'This will add all records from the file as new entries. Existing data will not be changed or removed.'**
+  String get import_confirm_message;
+
+  /// No description provided for @import_cancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Import cancelled'**
+  String get import_cancelled;
+
+  /// No description provided for @import_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {wallets} wallets, {categories} categories, {transactions} transactions, {budgets} budgets, {recurringExpenses} recurring expenses'**
+  String import_success(Object budgets, Object categories, Object recurringExpenses, Object transactions, Object wallets);
+
   /// No description provided for @color_picker.
   ///
   /// In en, this message translates to:

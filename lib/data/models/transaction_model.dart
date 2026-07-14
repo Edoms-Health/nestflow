@@ -16,6 +16,8 @@ class TransactionModel {
   final DateTime date;
   final DateTime? startDate;
   final DateTime? endDate;
+  final double? interestRate;
+  final bool interestIsDaily;
   final String? note;
   final String currency;
   final double currencyRate;
@@ -46,6 +48,8 @@ class TransactionModel {
     this.toWallet,
     this.startDate,
     this.endDate,
+    this.interestRate,
+    this.interestIsDaily = false,
     this.note,
     this.tags,
   });
@@ -61,6 +65,8 @@ class TransactionModel {
     date: t.date,
     startDate: t.startDate,
     endDate: t.endDate,
+    interestRate: t.interestRate,
+    interestIsDaily: t.interestIsDaily ?? false,
     note: t.note,
     currency: t.currency,
     currencyRate: t.currencyRate,
@@ -80,6 +86,8 @@ class TransactionModel {
     date: date,
     startDate: startDate,
     endDate: endDate,
+    interestRate: interestRate,
+    interestIsDaily: interestIsDaily,
     note: note,
     currency: currency,
     currencyRate: currencyRate,
@@ -98,6 +106,8 @@ class TransactionModel {
     date: Value(date),
     startDate: Value(startDate),
     endDate: Value(endDate),
+    interestRate: Value(interestRate),
+    interestIsDaily: Value(interestIsDaily),
     note: Value(note),
     currency: Value(currency),
     currencyRate: Value(currencyRate),
@@ -120,6 +130,8 @@ class TransactionModel {
     DateTime? date,
     DateTime? startDate,
     DateTime? endDate,
+    double? interestRate,
+    bool? interestIsDaily,
     String? note,
     String? currency,
     double? currencyRate,
@@ -143,6 +155,8 @@ class TransactionModel {
       date: date ?? this.date,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
+      interestRate: interestRate ?? this.interestRate,
+      interestIsDaily: interestIsDaily ?? this.interestIsDaily,
       note: note ?? this.note,
       currency: currency ?? this.currency,
       currencyRate: currencyRate ?? this.currencyRate,
@@ -155,4 +169,37 @@ class TransactionModel {
   }
 
   Money get amountMoney => Money(amount, currency);
+
+  /// Interest owed on this debt as of [asOf] (defaults to now).
+  /// - Flat mode: a one-time % of the principal, constant over time.
+  /// - Daily mode: [interestRate]% of the principal, charged for each day
+  ///   elapsed since [startDate] (or [date] if no start date is set).
+  /// Zero if no interest rate is set.
+  double interestAmountAsOf([DateTime? asOf]) {
+    if (interestRate == null) return 0;
+    if (!interestIsDaily) return amount * (interestRate! / 100);
+
+    final from = startDate ?? date;
+    final to = asOf ?? DateTime.now();
+    final daysElapsed = to.isAfter(from) ? to.difference(from).inDays : 0;
+    return amount * (interestRate! / 100) * daysElapsed;
+  }
+
+  /// Total amount to be repaid as of [asOf] (defaults to now):
+  /// principal + interest accrued so far.
+  double totalWithInterestAsOf([DateTime? asOf]) =>
+      amount + interestAmountAsOf(asOf);
+
+  Money interestAmountMoneyAsOf([DateTime? asOf]) =>
+      Money(interestAmountAsOf(asOf), currency);
+
+  Money totalWithInterestMoneyAsOf([DateTime? asOf]) =>
+      Money(totalWithInterestAsOf(asOf), currency);
+
+  /// Convenience getters using the current moment — handy in widgets that
+  /// don't need to pin a specific "as of" date.
+  double get interestAmount => interestAmountAsOf();
+  double get totalWithInterest => totalWithInterestAsOf();
+  Money get interestAmountMoney => interestAmountMoneyAsOf();
+  Money get totalWithInterestMoney => totalWithInterestMoneyAsOf();
 }

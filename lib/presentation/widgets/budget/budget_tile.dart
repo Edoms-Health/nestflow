@@ -82,6 +82,20 @@ class BudgetTile extends StatelessWidget {
               ],
             ),
             SizedBox(height: 15),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  '${(budget.progressValue * 100).round()}%',
+                  style: TextStyle(
+                    color: budget.progressColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 6),
             LinearProgressIndicator(
               value: budget.progressValue,
               backgroundColor: context.colors.textPlaceholder.withValues(

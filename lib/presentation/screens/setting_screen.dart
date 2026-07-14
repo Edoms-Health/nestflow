@@ -38,19 +38,6 @@ class SettingScreen extends StatelessWidget {
                             ),
                           ),
                           CustomSettingTile(
-                            title: context.tr!.manage_budgets,
-                            icon: AppIcons.budgets,
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => BlocProvider(
-                                  create: (_) => BudgetCubit()..loadBudgets(),
-                                  child: BudgetScreen(),
-                                ),
-                              ),
-                            ),
-                          ),
-                          CustomSettingTile(
                             title: context.tr!.manage_categories,
                             icon: AppIcons.categories,
                             onTap: () => Navigator.push(
@@ -254,6 +241,24 @@ class SettingScreen extends StatelessWidget {
                         ],
                       ),
                       SettingCard(
+                        title: context.tr!.data_management,
+                        children: [
+                          SettingTile(
+                            title: context.tr!.export_all_data,
+                            subtitle: context.tr!.export_all_data_description,
+                            icon: AppIcons.report,
+                            hasDivider: true,
+                            onTap: () => _exportAllData(context),
+                          ),
+                          SettingTile(
+                            title: context.tr!.import_data,
+                            subtitle: context.tr!.import_data_description,
+                            icon: AppIcons.exchange,
+                            onTap: () => _importAllData(context),
+                          ),
+                        ],
+                      ),
+                      SettingCard(
                         title: context.tr!.app_name,
                         children: [
                           SettingTile(
@@ -298,6 +303,97 @@ class SettingScreen extends StatelessWidget {
               : Center(child: CircularProgressIndicator()),
         );
       },
+    );
+  }
+
+  Future<void> _exportAllData(BuildContext context) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        content: Row(
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(width: 20),
+            Expanded(child: Text(context.tr!.exporting_data)),
+          ],
+        ),
+      ),
+    );
+
+    String? path;
+    try {
+      path = await exportAllDataExcel();
+    } finally {
+      if (context.mounted) Navigator.pop(context);
+    }
+
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          path != null ? context.tr!.export_success : context.tr!.export_cancelled,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _importAllData(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(context.tr!.import_confirm_title),
+        content: Text(context.tr!.import_confirm_message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(context.tr!.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(context.tr!.ok),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        content: Row(
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(width: 20),
+            Expanded(child: Text(context.tr!.importing_data)),
+          ],
+        ),
+      ),
+    );
+
+    ImportSummary? summary;
+    try {
+      summary = await importAllDataExcel();
+    } finally {
+      if (context.mounted) Navigator.pop(context);
+    }
+
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          summary != null
+              ? context.tr!.import_success(
+                  summary.wallets,
+                  summary.categories,
+                  summary.transactions,
+                  summary.budgets,
+                  summary.recurringExpenses,
+                )
+              : context.tr!.import_cancelled,
+        ),
+      ),
     );
   }
 

@@ -259,6 +259,47 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cancel => 'إلغاء';
 
   @override
+  String get data_management => 'Data Management';
+
+  @override
+  String get export_all_data => 'Export All Data';
+
+  @override
+  String get export_all_data_description => 'Save all your data as an Excel file';
+
+  @override
+  String get import_data => 'Import Data';
+
+  @override
+  String get import_data_description => 'Load data from a previously exported Excel file';
+
+  @override
+  String get exporting_data => 'Exporting data…';
+
+  @override
+  String get importing_data => 'Importing data…';
+
+  @override
+  String get export_success => 'Data exported successfully';
+
+  @override
+  String get export_cancelled => 'Export cancelled';
+
+  @override
+  String get import_confirm_title => 'Import data?';
+
+  @override
+  String get import_confirm_message => 'This will add all records from the file as new entries. Existing data will not be changed or removed.';
+
+  @override
+  String get import_cancelled => 'Import cancelled';
+
+  @override
+  String import_success(Object budgets, Object categories, Object recurringExpenses, Object transactions, Object wallets) {
+    return 'Imported $wallets wallets, $categories categories, $transactions transactions, $budgets budgets, $recurringExpenses recurring expenses';
+  }
+
+  @override
   String get color_picker => 'منتقي الألوان';
 
   @override

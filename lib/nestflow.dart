@@ -49,3 +49,25 @@ export 'package:nestflow/presentation/widgets/report/business_report_pdf_export.
 export 'package:nestflow/presentation/widgets/report/business_report_excel_export.dart';
 export 'package:nestflow/presentation/screens/business/tabs/business_cashbook_expenses_tab.dart';
 export 'package:nestflow/presentation/screens/business/business_cashbook_expense_form_screen.dart';
+
+// Financials feature
+export 'package:nestflow/data/database/tables/financials_tables.dart';
+export 'package:nestflow/data/models/monthly_financial_model.dart';
+export 'package:nestflow/data/models/balance_sheet_account_model.dart';
+export 'package:nestflow/data/database/daos/financials/monthly_financial_dao.dart';
+export 'package:nestflow/data/database/daos/financials/balance_sheet_account_dao.dart';
+export 'package:nestflow/data/services/financial_service.dart';
+export 'package:nestflow/data/services/balance_sheet_service.dart';
+export 'package:nestflow/logic/cubits/financial/financial_cubit.dart';
+export 'package:nestflow/logic/cubits/balance_sheet/balance_sheet_cubit.dart';
+export 'package:nestflow/presentation/screens/financial_screen.dart';
+export 'package:nestflow/presentation/screens/financial_entry_form_screen.dart';
+export 'package:nestflow/presentation/screens/balance_sheet_account_form_screen.dart';
+export 'package:nestflow/presentation/widgets/report/financial_report_pdf_export.dart';
+export 'package:nestflow/presentation/widgets/report/financial_report_excel_export.dart';
+
+// Recurring expense feature
+export 'package:nestflow/data/models/recurring_expense_model.dart';
+export 'package:nestflow/data/database/daos/recurring_expense/recurring_expense_dao.dart';
+export 'package:nestflow/data/services/recurring_expense_service.dart';
+export 'package:nestflow/presentation/screens/recurring_expense_confirm_screen.dart';

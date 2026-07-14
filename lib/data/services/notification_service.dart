@@ -9,6 +9,11 @@ class NotificationService {
   factory NotificationService() => _instance;
   NotificationService._internal();
 
+  /// Attach this to your root MaterialApp's `navigatorKey` so notification
+  /// taps can push a screen even from a cold start.
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
+
   final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
   bool _initialized = false;
 
@@ -23,13 +28,46 @@ class NotificationService {
       requestSoundPermission: true,
     );
     const settings = InitializationSettings(android: androidSettings, iOS: iosSettings);
-    await _plugin.initialize(settings: settings);
+    await _plugin.initialize(
+      settings: settings,
+      onDidReceiveNotificationResponse: _onNotificationTapped,
+    );
 
     final androidImpl = _plugin
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
     await androidImpl?.requestNotificationsPermission();
 
     _initialized = true;
+  }
+
+  void _onNotificationTapped(NotificationResponse response) {
+    final payload = response.payload;
+    if (payload == null) return;
+
+    final parts = payload.split(':');
+    if (parts.length != 2) return;
+
+    final type = parts[0];
+    final id = int.tryParse(parts[1]);
+    if (id == null) return;
+
+    if (type == 'recurring_expense') {
+      _openRecurringExpenseConfirm(id);
+    }
+  }
+
+  Future<void> _openRecurringExpenseConfirm(int recurringExpenseId) async {
+    final model = await RecurringExpenseService().find(recurringExpenseId);
+    if (model == null) return;
+
+    final navigator = navigatorKey.currentState;
+    if (navigator == null) return;
+
+    navigator.push(
+      MaterialPageRoute(
+        builder: (_) => RecurringExpenseConfirmScreen(recurringExpense: model),
+      ),
+    );
   }
 
   // ---------------------------------------------------------------------
@@ -217,7 +255,7 @@ class NotificationService {
 
     final body = activeAtRisk
         .map((b) => '${b.name}: ${(b.progressValue * 100).toStringAsFixed(0)}%')
-        .join('   •   ');
+        .join('   ?   ');
 
     var fireTime = tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
     final nowTz = tz.TZDateTime.now(tz.local);
@@ -231,5 +269,68 @@ class NotificationService {
       notificationDetails: const NotificationDetails(android: _budgetChannel, iOS: DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentSound: true)),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     );
+  }
+
+  // ---------------------------------------------------------------------
+  // Recurring expense reminders
+  // ---------------------------------------------------------------------
+  static const _recurringExpenseChannel = AndroidNotificationDetails(
+    'recurring_expense_reminders',
+    'Scheduled Expense Reminders',
+    channelDescription: 'Reminders for daily, monthly, and annual scheduled expenses',
+    importance: Importance.high,
+    priority: Priority.high,
+    playSound: true,
+    enableVibration: true,
+  );
+
+  /// Kept in a range that doesn't collide with todo (id*10+1/+2), the daily
+  /// report (9999), the budget report (9998), or the transaction follow-up
+  /// (3000000+).
+  int _recurringExpenseId(int recurringExpenseId) => 4000000 + recurringExpenseId;
+
+  Future<void> scheduleRecurringExpenseReminder(
+    RecurringExpenseModel model,
+  ) async {
+    await cancelRecurringExpenseReminder(model.id);
+    if (!model.isActive) return;
+
+    final now = DateTime.now();
+    final due = model.nextDueDate;
+    final label = model.note?.trim().isNotEmpty == true
+        ? model.note!.trim()
+        : (model.category?.name ?? 'your scheduled expense');
+    final title = 'Scheduled expense due';
+    final body = '${model.frequency.label} ? $label (${model.amountMoney.format()})';
+
+    final details = NotificationDetails(
+      android: _recurringExpenseChannel,
+      iOS: const DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentSound: true),
+    );
+    final payload = 'recurring_expense:${model.id}';
+
+    if (due.isAfter(now)) {
+      await _plugin.zonedSchedule(
+        id: _recurringExpenseId(model.id),
+        title: title,
+        body: body,
+        scheduledDate: tz.TZDateTime.from(due, tz.local),
+        notificationDetails: details,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        payload: payload,
+      );
+    } else {
+      await _plugin.show(
+        id: _recurringExpenseId(model.id),
+        title: title,
+        body: body,
+        notificationDetails: details,
+        payload: payload,
+      );
+    }
+  }
+
+  Future<void> cancelRecurringExpenseReminder(int recurringExpenseId) async {
+    await _plugin.cancel(id: _recurringExpenseId(recurringExpenseId));
   }
 }

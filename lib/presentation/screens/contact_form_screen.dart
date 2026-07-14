@@ -15,7 +15,6 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
-  String? _provider;
 
   @override
   void initState() {
@@ -25,7 +24,6 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
     _nameController.text = widget.contact?.name ?? '';
     _phoneController.text = widget.contact?.phone ?? '';
     _noteController.text = widget.contact?.note ?? '';
-    _provider = widget.contact?.provider;
   }
 
   @override
@@ -73,7 +71,6 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
                   phone: _phoneController.text.trim().isEmpty
                       ? null
                       : _phoneController.text.trim(),
-                  provider: _provider,
                 )) {
                   if (!context.mounted) return;
                   Navigator.pop(context);
@@ -114,22 +111,6 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
                         maxLength: 15,
                         required: false,
                         keyboardType: TextInputType.phone,
-                      ),
-                      SizedBox(height: 12),
-                      DropdownButtonFormField<String>(
-                        initialValue: _provider,
-                        decoration: InputDecoration(
-                          labelText: 'Mobile Money Provider',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        items: const [
-                          DropdownMenuItem(value: 'airtel', child: Text('Airtel Money')),
-                          DropdownMenuItem(value: 'mtn', child: Text('MTN MoMo')),
-                          DropdownMenuItem(value: 'other', child: Text('Other / None')),
-                        ],
-                        onChanged: (value) => setState(() => _provider = value),
                       ),
                     ],
                   ),

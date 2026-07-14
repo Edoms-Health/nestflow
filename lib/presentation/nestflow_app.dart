@@ -23,6 +23,7 @@ class NestFlowApp extends StatelessWidget {
         builder: (BuildContext context, SharedState state) {
           if (state is SharedInitial) {
             return MaterialApp(
+              navigatorKey: NotificationService.navigatorKey,
               title: context.tr?.app_name,
               theme: lightThemeData,
               darkTheme: darkThemeData,

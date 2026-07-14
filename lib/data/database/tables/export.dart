@@ -7,3 +7,4 @@ export 'transaction_tags_table.dart';
 export 'transactions_table.dart';
 export 'wallets_table.dart';
 export 'business_tables.dart';
+export 'recurring_expenses_table.dart';

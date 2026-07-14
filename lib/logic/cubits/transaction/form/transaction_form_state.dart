@@ -23,8 +23,12 @@ class TransactionFormInitial extends TransactionFormState {
   final DateTime? date;
   final DateTime? startDate;
   final DateTime? endDate;
+  final double? interestRate;
+  final bool interestIsDaily;
   final String? currency;
   final bool noImpactOnBalance;
+  final bool isRecurring;
+  final RecurrenceFrequency recurrenceFrequency;
   final bool processing;
   final Map<String, String> errors;
 
@@ -39,11 +43,15 @@ class TransactionFormInitial extends TransactionFormState {
     this.date,
     this.startDate,
     this.endDate,
+    this.interestRate,
+    this.interestIsDaily = false,
     this.contactId,
     this.contact,
     this.toWalletId,
     this.currency,
     this.noImpactOnBalance = false,
+    this.isRecurring = false,
+    this.recurrenceFrequency = RecurrenceFrequency.monthly,
     this.processing = false,
     this.errors = const {},
   });
@@ -62,9 +70,13 @@ class TransactionFormInitial extends TransactionFormState {
     DateTime? date,
     DateTime? startDate,
     DateTime? endDate,
+    double? interestRate,
+    bool? interestIsDaily,
     String? currency,
     double? currencyRate,
     bool? noImpactOnBalance,
+    bool? isRecurring,
+    RecurrenceFrequency? recurrenceFrequency,
     bool? processing,
     Map<String, String>? errors,
   }) {
@@ -80,9 +92,13 @@ class TransactionFormInitial extends TransactionFormState {
       date: date ?? this.date,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
+      interestRate: interestRate ?? this.interestRate,
+      interestIsDaily: interestIsDaily ?? this.interestIsDaily,
       tags: tags ?? this.tags,
       currency: currency ?? this.currency,
       noImpactOnBalance: noImpactOnBalance ?? this.noImpactOnBalance,
+      isRecurring: isRecurring ?? this.isRecurring,
+      recurrenceFrequency: recurrenceFrequency ?? this.recurrenceFrequency,
       categoryId: categories != null
           ? categories.first.id
           : (categoryId ?? this.categoryId),
@@ -104,9 +120,13 @@ class TransactionFormInitial extends TransactionFormState {
     date,
     startDate,
     endDate,
+    interestRate,
+    interestIsDaily,
     currency,
     contact,
     noImpactOnBalance,
+    isRecurring,
+    recurrenceFrequency,
     processing,
     errors,
   ];

@@ -14,7 +14,9 @@ class TransactionFormScreen extends StatefulWidget {
 
 class _TransactionFormScreenState extends State<TransactionFormScreen> {
   final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _interestController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
+  bool _interestIsDaily = false;
 
   @override
   void initState() {
@@ -23,11 +25,16 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
         ? widget.transaction!.amount.toString()
         : '';
     _noteController.text = widget.transaction?.note ?? '';
+    _interestController.text = widget.transaction?.interestRate != null
+        ? widget.transaction!.interestRate.toString()
+        : '';
+    _interestIsDaily = widget.transaction?.interestIsDaily ?? false;
   }
 
   @override
   void dispose() {
     _amountController.dispose();
+    _interestController.dispose();
     _noteController.dispose();
     super.dispose();
   }
@@ -73,6 +80,10 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
           bottomNavigationBar: state is TransactionFormInitial
               ? FormBottomNavigationBar(
                   okButtonOnPressed: () async {
+                    context.read<TransactionFormCubit>().setData(
+                      interestRate: double.tryParse(_interestController.text),
+                      interestIsDaily: _interestIsDaily,
+                    );
                     if (await context.read<TransactionFormCubit>().submit(
                       {
                         "amount_is_required": context.tr!.attribute_is_required(
@@ -255,6 +266,64 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
                               .read<TransactionFormCubit>()
                               .setData(contactId: contact.id, contact: contact),
                         ),
+                      Builder(
+                        builder: (context) {
+                          final selectedCategory = state.categories
+                              .where((c) => c.id == state.categoryId)
+                              .firstOrNull;
+                          final isBorrowedDebt = state.type == TransactionType.debts &&
+                              selectedCategory?.identifier ==
+                                  'receiving_debts_and_installments';
+                          if (!isBorrowedDebt) return const SizedBox.shrink();
+
+                          return AnimatedBuilder(
+                            animation: Listenable.merge(
+                              [_amountController, _interestController],
+                            ),
+                            builder: (context, _) {
+                              final amount =
+                                  double.tryParse(_amountController.text) ?? 0;
+                              final rate =
+                                  double.tryParse(_interestController.text) ?? 0;
+                              final interest = amount * (rate / 100);
+                              final total = amount + interest;
+
+                              return ContainerForm(
+                                margin: EdgeInsets.only(
+                                  bottom: AppDimensions.inputBottomMargin,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    CustomTextFormField(
+                                      label: 'Interest Rate (%)',
+                                      controller: _interestController,
+                                      hintText: 'e.g. 5',
+                                      required: false,
+                                      keyboardType: TextInputType.numberWithOptions(
+                                        decimal: true,
+                                      ),
+                                      paddingBottom: 0,
+                                    ),
+                                    if (rate > 0) ...[
+                                      const SizedBox(height: 10),
+                                      Text(
+                                        'Interest: ${interest.toStringAsFixed(2)}  •  '
+                                        'Total to repay: ${total.toStringAsFixed(2)}',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: context.colors.textSecondary,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
                       if (state.type == TransactionType.debts)
                         ContainerForm(
                           paddingVertical: 0,
@@ -360,6 +429,63 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
                                 ),
                               ],
                             ),
+                            if (widget.transaction == null &&
+                                state.type == TransactionType.expenses) ...[
+                              const SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Repeat this expense',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          "You'll get a reminder each time it's due",
+                                          style: TextStyle(
+                                            color: context.colors.textSecondary,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Transform.scale(
+                                    scale: 0.75,
+                                    child: Switch(
+                                      value: state.isRecurring,
+                                      onChanged: (bool value) => context
+                                          .read<TransactionFormCubit>()
+                                          .setData(isRecurring: value),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              if (state.isRecurring) ...[
+                                const SizedBox(height: 10),
+                                SegmentedButton<RecurrenceFrequency>(
+                                  segments: RecurrenceFrequency.values
+                                      .map(
+                                        (f) => ButtonSegment(
+                                          value: f,
+                                          label: Text(f.label),
+                                        ),
+                                      )
+                                      .toList(),
+                                  selected: {state.recurrenceFrequency},
+                                  onSelectionChanged: (selection) => context
+                                      .read<TransactionFormCubit>()
+                                      .setData(
+                                        recurrenceFrequency: selection.first,
+                                      ),
+                                ),
+                              ],
+                            ],
                           ],
                         ),
                       ),

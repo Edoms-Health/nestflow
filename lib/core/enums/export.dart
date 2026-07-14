@@ -4,3 +4,4 @@ export 'success_type.dart';
 export 'transaction_type.dart';
 export 'user_prefs_keys.dart';
 export 'wallet_type.dart';
+export 'recurrence_frequency.dart';

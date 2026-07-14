@@ -9,6 +9,7 @@ export 'report/report_cubit.dart';
 export 'setting/setting_cubit.dart';
 export 'shared/shared_cubit.dart';
 export 'tag/tag_cubit.dart';
+export 'recurring_expense/recurring_expense_cubit.dart';
 export 'transaction/form/transaction_form_cubit.dart';
 export 'transaction/show/transaction_show_cubit.dart';
 export 'transaction/transaction_cubit.dart';

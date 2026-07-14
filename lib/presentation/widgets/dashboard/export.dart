@@ -2,3 +2,4 @@ export 'dashboard_weekly_chart.dart';
 export 'financial_summary.dart';
 export 'recent_transactions.dart';
 export 'quick_actions_grid.dart';
+export 'send_receive_pay_actions.dart';

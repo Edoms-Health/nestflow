@@ -8,7 +8,6 @@ class ContactModel {
   final String name;
   final String color;
   final String? phone;
-  final String? provider;
   final String? note;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -18,7 +17,6 @@ class ContactModel {
     required this.name,
     required this.color,
     this.phone,
-    this.provider,
     this.note,
     required this.createdAt,
     required this.updatedAt,
@@ -30,7 +28,6 @@ class ContactModel {
       name: entity.name,
       color: entity.color,
       phone: entity.phone,
-      provider: entity.provider,
       note: entity.note,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
@@ -43,7 +40,6 @@ class ContactModel {
       name: name,
       color: color,
       phone: phone,
-      provider: provider,
       note: note,
       createdAt: createdAt,
       updatedAt: updatedAt,
@@ -55,7 +51,6 @@ class ContactModel {
     String? name,
     String? color,
     String? phone,
-    String? provider,
     String? note,
     DateTime? updatedAt,
   }) {
@@ -64,7 +59,6 @@ class ContactModel {
       name: name ?? this.name,
       color: color ?? this.color,
       phone: phone ?? this.phone,
-      provider: provider ?? this.provider,
       note: note ?? this.note,
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -76,7 +70,6 @@ class ContactModel {
       name: Value(name),
       color: Value(color),
       phone: Value(phone),
-      provider: Value(provider),
       note: Value(note),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),

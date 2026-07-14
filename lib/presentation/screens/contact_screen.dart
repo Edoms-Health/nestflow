@@ -41,6 +41,11 @@ class ContactScreen extends StatelessWidget {
           appBar: AppBar(
             title: Text(context.tr!.contacts),
             actions: [
+              IconButton(
+                onPressed: () => _importFromDevice(context: context),
+                icon: Icon(Icons.contact_page_outlined),
+                tooltip: 'Import from phone',
+              ),
               if ((state is ContactLoaded) && state.contacts.isNotEmpty)
                 IconButton(
                   onPressed: () => _goToForm(context: context),
@@ -85,6 +90,11 @@ class ContactScreen extends StatelessWidget {
                     icon: AppIcons.plus,
                     onTap: () => _goToForm(context: context),
                   ),
+                  PlaceholderViewAction(
+                    title: 'Import from phone',
+                    icon: AppIcons.contacts,
+                    onTap: () => _importFromDevice(context: context),
+                  ),
                 ],
               );
             },
@@ -92,6 +102,42 @@ class ContactScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _importFromDevice({required BuildContext context}) async {
+    final cubit = context.read<ContactCubit>();
+    final messenger = ScaffoldMessenger.of(context);
+
+    messenger.showSnackBar(
+      const SnackBar(content: Text('Importing contacts...')),
+    );
+
+    final result = await cubit.importFromDevice();
+
+    if (!context.mounted) return;
+    messenger.hideCurrentSnackBar();
+
+    if (result.permissionDenied) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Contacts permission is required to import.'),
+        ),
+      );
+    } else if (result.error) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Failed to import contacts.')),
+      );
+    } else {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            result.importedCount == 0
+                ? 'No new contacts to import.'
+                : 'Imported ${result.importedCount} contact(s).',
+          ),
+        ),
+      );
+    }
   }
 
   void _goToForm({required BuildContext context, ContactModel? contact}) {

@@ -10,8 +10,6 @@ class Contacts extends Table {
 
   TextColumn get phone => text().nullable().withLength(min: 0, max: 20)();
 
-  TextColumn get provider => text().nullable().withLength(min: 0, max: 20)();
-
   TextColumn get note => text().nullable()();
 
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();

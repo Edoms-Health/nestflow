@@ -118,6 +118,8 @@ class TransactionShowDetailsModalBottomSheet extends StatelessWidget {
                           state.transaction.startDate!,
                           state.transaction.endDate!,
                         ),
+                      if (state.transaction.interestRate != null)
+                        _buildInterest(context, state.transaction),
                       if (state.transaction.tags != null &&
                           state.transaction.tags!.isNotEmpty)
                         _buildTags(context, state.transaction.tags!),
@@ -391,6 +393,76 @@ class TransactionShowDetailsModalBottomSheet extends StatelessWidget {
               Text(
                 context.read<SharedCubit>().formatDate(endDate),
                 style: TextStyle(color: context.colors.textSecondary),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInterest(BuildContext context, TransactionModel transaction) {
+    final isDaily = transaction.interestIsDaily;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 15),
+      decoration: BoxDecoration(
+        color: context.colors.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                isDaily
+                    ? 'Interest (${transaction.interestRate}% / day)'
+                    : 'Interest (${transaction.interestRate}% one-time)',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+              ),
+              Text(
+                transaction.interestAmountMoney.format(),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Principal',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: context.colors.textSecondary,
+                ),
+              ),
+              Text(
+                transaction.amountMoney.format(),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: context.colors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                isDaily ? 'Total to repay today' : 'Total to repay',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+              Text(
+                transaction.totalWithInterestMoney.format(),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  color: context.colors.primary,
+                ),
               ),
             ],
           ),

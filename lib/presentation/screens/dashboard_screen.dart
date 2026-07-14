@@ -77,6 +77,61 @@ class DashboardScreen extends StatelessWidget {
                             icon: AppIcons.wallets,
                             onTap: () => _goToWallets(context),
                           ),
+                          QuickAction(
+                            label: 'Budgets',
+                            icon: AppIcons.budgets,
+                            onTap: () => _goToBudgets(context),
+                          ),
+                          QuickAction(
+                            label: 'Categories',
+                            icon: AppIcons.categories,
+                            onTap: () => _goToCategories(context),
+                          ),
+                          QuickAction(
+                            label: 'Recurring\nExpenses',
+                            icon: AppIcons.calendar,
+                            onTap: () => _goToRecurringExpenses(context),
+                          ),
+                          QuickAction(
+                            label: 'Contacts',
+                            icon: AppIcons.contacts,
+                            onTap: () => _goToContacts(context),
+                          ),
+                          QuickAction(
+                            label: 'Financials',
+                            icon: AppIcons.report,
+                            onTap: () => _goToFinancials(context),
+                          ),
+                          QuickAction(
+                            label: 'Send\nMoney',
+                            icon: AppIcons.expense,
+                            color: TransactionType.expenses.color,
+                            onTap: () => startContactTransaction(
+                              context,
+                              type: TransactionType.expenses,
+                              refresh: refresh,
+                            ),
+                          ),
+                          QuickAction(
+                            label: 'Receive\nMoney',
+                            icon: AppIcons.income,
+                            color: TransactionType.income.color,
+                            onTap: () => startContactTransaction(
+                              context,
+                              type: TransactionType.income,
+                              refresh: refresh,
+                            ),
+                          ),
+                          QuickAction(
+                            label: 'Pay',
+                            icon: AppIcons.expense,
+                            color: TransactionType.expenses.color,
+                            onTap: () => startContactTransaction(
+                              context,
+                              type: TransactionType.expenses,
+                              refresh: refresh,
+                            ),
+                          ),
                         ],
                       ),
                       DashboardWeeklyChart(
@@ -126,6 +181,70 @@ class DashboardScreen extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (context) => const WalletPinScreen(),
+      ),
+    );
+  }
+
+  void _goToBudgets(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BlocProvider(
+          create: (_) => BudgetCubit()..loadBudgets(),
+          child: BudgetScreen(),
+        ),
+      ),
+    );
+  }
+
+  void _goToRecurringExpenses(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BlocProvider(
+          create: (_) => RecurringExpenseCubit()..loadAll(),
+          child: const RecurringExpenseScreen(),
+        ),
+      ),
+    );
+  }
+
+  void _goToCategories(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BlocProvider(
+          create: (_) =>
+              CategoryCubit()..loadCategories(type: TransactionType.income),
+          child: CategoryScreen(),
+        ),
+      ),
+    );
+  }
+
+  void _goToFinancials(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (_) => FinancialCubit()..loadYear()),
+            BlocProvider(create: (_) => BalanceSheetCubit()..load()),
+          ],
+          child: const FinancialScreen(),
+        ),
+      ),
+    );
+  }
+
+  void _goToContacts(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BlocProvider(
+          create: (_) => ContactCubit()..loadContacts(),
+          child: ContactScreen(),
+        ),
       ),
     );
   }

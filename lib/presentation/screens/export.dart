@@ -13,6 +13,8 @@ export 'report_screen.dart';
 export 'setting_screen.dart';
 export 'tag_form_screen.dart';
 export 'tag_screen.dart';
+export 'recurring_expense_screen.dart';
+export 'recurring_expense_form_screen.dart';
 export 'transaction_form_screen.dart';
 export 'transaction_screen.dart';
 export 'wallet_form_screen.dart';

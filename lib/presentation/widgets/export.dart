@@ -8,5 +8,6 @@ export 'report/export.dart';
 export 'setting/export.dart';
 export 'shared/export.dart';
 export 'tag/export.dart';
+export 'recurring_expense/export.dart';
 export 'transaction/export.dart';
 export 'wallet/export.dart';
